@@ -36,7 +36,7 @@
 
         var key = getKey();
         if (!key || key.byteLength != 16) {
-          alert("This video is encrypted, you need to supply correct ley to playback");
+          alert("This video is encrypted, you need to supply correct key to start playback");
         } else if(!Hls.isSupported()) {
           alert("This browser does not support playback of this media. Please open this link in Firefox or Chrome");
         } else {
