@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <title>Video playback</title>
+    <style>
+      video
+      {
+          width: 100vw; 
+          height: 56.25vw; /* height:width ratio = 9/16 = .5625  */
+          max-height: 100vh;
+          max-width: 177.78vh; /* 16/9 = 1.778 */
+          margin: auto;
+          align-self: center;
+      }   
+    </style>
+  </head>
+
+  <body>
+      <script src="hls.light.min.js"></script>
+
+      <video id="video" controls></video>
+
+      <script>
+        function fromHexString(hexString) {
+          var bytes = new Uint8Array(Math.ceil(hexString.length / 2));
+          for (var i = 0; i < bytes.length; i++) {
+            bytes[i] = parseInt(hexString.substr(i * 2, 2), 16);
+          }
+          return bytes;
+        }
+
+        function getKey() {
+          return fromHexString(location.hash.substring(1));
+        }
+
+        var key = getKey();
+        if (!key || key.byteLength != 16) {
+          alert("This video is encrypted, you need to supply correct ley to playback");
+        } else if(!Hls.isSupported()) {
+          alert("This browser does not support playback of this media. Please open this link in Firefox or Chrome");
+        } else {
+          var video = document.getElementById('video');
+          var hls = new Hls();
+          if (location.hash !== "") {
+            hls.coreComponents.forEach(function(c) {
+              if (c.handledEvents.indexOf("hlsKeyLoading") >= 0) {
+                c.decryptkey = key;
+                c.decrypturl = "http://127.0.0.1/playlist.key";
+              }
+            });
+          }
+          hls.loadSource('playlist.m3u8');
+          hls.attachMedia(video);
+          hls.on(Hls.Events.MANIFEST_PARSED,function() {
+            video.play();
+        });
+       }
+      </script>
+
+  </body>
+</html>
+
+
