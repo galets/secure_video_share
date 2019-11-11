@@ -48,5 +48,11 @@ Encoding complete. Load using:
 
 The `http-server` command is just given so that you can test the result. The resulting video will be 
 located in `~/Videos/svisha/3e9bd1703f4e4913ae5c4fa0dcc82da1`. This folder can be safely copied to an
-external web server. In order to playback the key after a hash character must be supplied in browaser
+external web server. In order to playback the key after a hash character must be supplied in browser
 (e.g.: `#63a595efc8b44fddc3cb8fa54aac602b`). Without such key video will not play.
+
+# Example
+
+Sample video hosted on Backblaze bucket could be viewed at: 
+https://f000.backblazeb2.com/file/mystaticweb/8beb6bb0a812404fa7359e0a94ee2653/index.html#b65d07f1e3739d32548b1e5c6cc716de
+
