@@ -1,9 +1,17 @@
 # Secure Video Share
 
 This tool was written because YouTube has a tendency to annoy me with copyright claims on my
-own videos because it's AIs screen all videos and grab any background music comparing it with
+own videos because it's AIs screens all videos and grab any background music comparing it with
 existing databases. What's most anoying here is that the videos I post are unlisted, so I
-clearly don't want people I didn't give a link to routinely looking at them.
+clearly don't want people I didn't give a link to routinely looking at them. This tool has
+essentially following objectives:
+
+* Enable posting of videos on common ISP infrastructure, such as S3, Backblaze, hosted web
+* Prevent provider from accessing stored videos, while allowing authorized users to view said
+videos inside browser
+* Support features enabling mass adoption and provide Youtube-like experience, importantly:
+adaptive bit rate, so that content could be comfortably viewed on mobile devices with limited
+bandwidth.
 
 # What it does
 
