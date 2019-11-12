@@ -202,6 +202,7 @@ namespace svisha
                 var ffargs = new List<string>();
                 ffargs.Add("-y");
                 ffargs.Add("-hide_banner");
+                ffargs.Add("-nostats");
                 ffargs.Add("-loglevel");
                 ffargs.Add("info");
                 ffargs.Add("-i");
@@ -225,13 +226,17 @@ namespace svisha
                         ffargs.Add("-profile:v");
                         ffargs.Add("main");
                         ffargs.Add("-level");
-                        ffargs.Add("3.1");
+                        ffargs.Add("3.0");
                     }
 
+                    // ffargs.Add("-acodec");
+                    // ffargs.Add("aac");
+                    // ffargs.Add("-b:a");
+                    // ffargs.Add($"{sr.AudioBitRate}k");
                     ffargs.Add("-acodec");
-                    ffargs.Add("aac");
+                    ffargs.Add("libmp3lame");
                     ffargs.Add("-b:a");
-                    ffargs.Add($"{sr.BitRate}k");
+                    ffargs.Add($"{sr.AudioBitRate + 16}k");
 
                     ffargs.Add("-g");
                     ffargs.Add("60");
@@ -251,7 +256,7 @@ namespace svisha
                     var streamFile = $"video_{sr.Name}.m3u8";
                     ffargs.Add(Path.Combine(outputPathFinal, streamFile));
 
-                    playlist.AppendFormat("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH={0},RESOLUTION={1}x{2}\n", (sr.BitRate + sr.AudioBitRate) * 1024, sr.Width, sr.Height);
+                    playlist.AppendFormat("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH={0},RESOLUTION={1}x{2}\n", (sr.BitRate + sr.AudioBitRate + 16) * 1024, sr.Width, sr.Height);
                     playlist.AppendLine(streamFile);
 
                 }
@@ -268,7 +273,9 @@ namespace svisha
             {
                 if (outputPathFinal != null && Directory.Exists(outputPathFinal))
                 {
+                    Console.Error.WriteLine($"Encoding failed, removing {outputPathFinal}");
                     Directory.Delete(outputPathFinal, true);
+                    throw;
                 }
             }
             finally
