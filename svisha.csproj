@@ -1,19 +1,15 @@
+<?xml version="1.0"?>
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
+    <Version>0.1.15.9395</Version>
   </PropertyGroup>
-
-  <Target Name="GenerateResources" BeforeTargets="Compile">
-    <Exec Command="$(ProjectDir)/tools/generate_resources.sh" 
-      Outputs="$(ProjectDir)/Resources.cs"
-    />
-  </Target>
     
   <ItemGroup>
-    <PackageReference Include="CommandLineParser" Version="2.6.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="CommandLineParser" Version="2.6.0"/>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2"/>
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,9 @@
 #!/bin/bash
 
-target=Resources.cs
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd)"
+PROJDIR="$(dirname $DIR)"
+
+target="$PROJDIR/Resources.cs"
 
 (
     echo "using System.Collections.Generic;"
@@ -9,7 +12,7 @@ target=Resources.cs
     echo "public class Resources {"
     echo "    public static readonly Dictionary<string, string> R = new Dictionary<string, string>() {"
 
-    for f in Resources/* ; do
+    for f in "$PROJDIR/Resources/*" ; do
 
         name=$(basename $f)
         contents=$(<$f)
