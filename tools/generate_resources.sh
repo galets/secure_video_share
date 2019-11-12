@@ -12,10 +12,10 @@ target="$PROJDIR/Resources.cs"
     echo "public class Resources {"
     echo "    public static readonly Dictionary<string, string> R = new Dictionary<string, string>() {"
 
-    for f in "$PROJDIR/Resources/*" ; do
+    for f in "$PROJDIR/Resources"/* ; do
 
-        name=$(basename $f)
-        contents=$(<$f)
+        name=$(basename "$f")
+        contents=$(<"$f")
         echo "{ @\"${name//\"/\\\"}\", @\"${contents//\"/\"\"}\" },"
 
     done
