@@ -138,6 +138,15 @@ namespace svisha
 
         static int DoList(ListOptions o)
         {
+            o.OutputPath ??= DefaultStoragePath;
+
+            var dbPath = Path.Combine(o.OutputPath, "database.json");
+            var db = Models.Database.Database.Load(dbPath);
+            foreach(var e in db.Entries.OrderBy(e => e.Date))
+            {
+                Console.WriteLine($"{e.Id}  {e.Date.ToString("yyyy-MM-dd")}  {e.Title}" );
+            }
+
             return 0;
         }
 
