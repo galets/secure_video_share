@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Runtime.InteropServices;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -31,12 +33,32 @@ namespace svisha
             return tcs.Task;
         }
 
+        private static string FindProgram(string program)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                program = program + ".exe";
+            }
+
+            var dir = AppDomain.CurrentDomain.BaseDirectory;
+            var local = Path.Combine(dir, program);
+            if (File.Exists(local))
+            {
+#if DEBUG
+                Console.Error.WriteLine($"Using {local}");
+#endif
+                return Path.Combine(dir, program);
+            }
+
+            return program;
+        }
+
         private static async Task<Process> _exec(string program, IEnumerable<string> args, Action<ProcessStartInfo> setProcessStartInfoProperties)
         {
             var startInfo = new ProcessStartInfo
             {
-                FileName = program,
-                CreateNoWindow = true,
+                FileName = FindProgram(program),
+                UseShellExecute = false,
             };
             
             foreach (var a in args)
@@ -51,6 +73,10 @@ namespace svisha
                 StartInfo = startInfo
             };
 
+#if DEBUG
+            Console.Error.WriteLine($"{program} {string.Join(" ", startInfo.ArgumentList)}");
+#endif
+
             process.Start();
             await WaitForExitAsync(process);
             return process;
@@ -61,8 +87,6 @@ namespace svisha
         {
             var process = await _exec(program, args, p =>
             {
-                p.RedirectStandardOutput = false;
-                p.UseShellExecute = false;
             });
 
             return process.ExitCode;
@@ -74,7 +98,6 @@ namespace svisha
             var process = await _exec(program, args, p =>
             {
                 p.RedirectStandardOutput = true;
-                p.UseShellExecute = false;
             });
 
             return process;
