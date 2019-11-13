@@ -21,8 +21,9 @@ EOF
 
 "$PROJDIR/tools/generate_resources.sh"
 
-target="$PROJDIR/builds/linux-x64/$new_version"
-mkdir -p "$target"
-dotnet-warp --verbose --output "$target/svisha" || rm -rf "$target"
-
-
+for rid in win-x64 linux-x64 ; do
+    target="$PROJDIR/bin/Release/netcoreapp3.0/$rid/publish"
+    dotnet publish --configuration Release --runtime $rid --output "$target"
+    cp "$PROJDIR/Platform/$rid/"* "$target/"
+    zip -j "$PROJDIR/builds/svisha_${rid}_${new_version}.zip" "$target"/*
+done

@@ -64,3 +64,14 @@ external web server. In order to playback the key after a hash character must be
 Sample video hosted on Backblaze bucket could be viewed at: 
 https://f000.backblazeb2.com/file/mystaticweb/8beb6bb0a812404fa7359e0a94ee2653/index.html#b65d07f1e3739d32548b1e5c6cc716de
 
+
+# Third Party Code Used
+
+* fmpeg https://www.ffmpeg.org/, licensed under GPLv3
+* linux ffmpeg static builds obtained here: https://johnvansickle.com/ffmpeg/
+* windows ffmpeg static builds obtained here: https://ffmpeg.zeranoe.com/builds/
+* hls.js https://github.com/video-dev/hls.js/ licensed under Apache 2.0
+* Command line parser https://github.com/commandlineparser/commandline
+* Newtonsoft JSON https://www.newtonsoft.com/json
+
+
