@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 #nullable enable
 
@@ -33,7 +34,7 @@ namespace svisha
             public StreamRate(string name, int w, int h, int br, int abr) => (Name, Width, Height, BitRate, AudioBitRate) = (name, w, h, br, abr);
         }
 
-        readonly static StreamRate[] StreamH264Wide = 
+        readonly static StreamRate[] StreamH264Wide =
         {
             new StreamRate("144p", 256, 144, 75, 32),
             new StreamRate("234p", 416, 234, 145, 32),
@@ -47,7 +48,7 @@ namespace svisha
             new StreamRate("1080ph", 1920, 1080, 7800, 128),
         };
 
-        readonly static StreamRate[] StreamH264Square = 
+        readonly static StreamRate[] StreamH264Square =
         {
             new StreamRate("144p", 192, 144, 65, 32),
             new StreamRate("234p", 312, 234, 109, 32),
@@ -61,7 +62,7 @@ namespace svisha
             new StreamRate("1080ph", 1440, 1080, 5851, 128),
         };
 
-        readonly static StreamRate[] StreamH265Wide = 
+        readonly static StreamRate[] StreamH265Wide =
         {
             new StreamRate("234p", 416, 234, 75, 32),
             new StreamRate("360p", 640, 360, 145, 32),
@@ -78,7 +79,7 @@ namespace svisha
             new StreamRate("2160ph", 3840, 2160, 16800, 128),
         };
 
-        readonly static StreamRate[] StreamH265Square = 
+        readonly static StreamRate[] StreamH265Square =
         {
             new StreamRate("234p", 312, 234, 65, 32),
             new StreamRate("360p", 480, 360, 109, 32),
@@ -97,9 +98,9 @@ namespace svisha
 
         private static OutputRatio GetOutputRatio(long w, long h)
         {
-            const double R16x9 = 16.0/9.0;
-            const double R4x3 = 4.0/3.0;
-            const double R9x16 = 9.0/16.0;
+            const double R16x9 = 16.0 / 9.0;
+            const double R4x3 = 4.0 / 3.0;
+            const double R9x16 = 9.0 / 16.0;
             double ratio = 1.0 * w / h;
             if (ratio >= R16x9 * 0.95 && ratio <= R16x9 * 1.05)
             {
@@ -135,6 +136,14 @@ namespace svisha
             return (w * 120) >= (sr.Width * 100) || (h * 120) >= (sr.Height * 100);
         }
 
+        public class Metadata
+        {
+            public string? iv;
+            public string? title;
+            public string? timestamp;
+            public string? thumbnail;
+        }
+
         static private RandomNumberGenerator rng = RandomNumberGenerator.Create();
 
         public readonly OutputRatio Ratio;
@@ -147,21 +156,57 @@ namespace svisha
         public readonly byte[] Key;
         private string? KeyPath;
         private string? KeyInfoPath;
-        
-        public Encode(string videoId, string inputPath, long? inputWidth, long? inputHeight, string outputPath, OutputCodec codec)
+        public Metadata metadata = new Metadata();
+
+        public Encode(string videoId, string inputPath, long? inputWidth, long? inputHeight, string? title, string? timestamp, string? thumbnail, string outputPath, OutputCodec codec)
         {
             this.VideoId = videoId ?? throw new ArgumentNullException("videoId");
             this.InputPath = inputPath ?? throw new ArgumentNullException("inputPath");
             this.InputWidth = inputWidth ?? throw new ArgumentNullException("inputWidth");
             this.InputHeight = inputHeight ?? throw new ArgumentNullException("inputHeight");
             this.Ratio = GetOutputRatio(this.InputWidth, this.InputHeight);
-            this.OutputPath = outputPath ?? throw new ArgumentNullException("outputPath");;
+            this.OutputPath = outputPath ?? throw new ArgumentNullException("outputPath"); ;
             this.Codec = codec;
 
             this.Key = new byte[16];
             rng.GetBytes(this.Key);
+
+            var metadataIV = new byte[16];
+            rng.GetBytes(metadataIV);
+            metadata.iv = Convert.ToBase64String(metadataIV);
+            metadata.title = Encrypt(title, metadata.iv);
+            metadata.timestamp = Encrypt(timestamp, metadata.iv);
+            metadata.thumbnail = Encrypt(thumbnail, metadata.iv);
         }
 
+        private string? Encrypt(string? text, string iv)
+        {
+            if (text == null)
+            {
+                return null;
+            }
+
+            using (Aes aesAlg = Aes.Create())
+            {
+                aesAlg.Key = Key;
+                aesAlg.Mode = CipherMode.CBC;
+                aesAlg.IV = Convert.FromBase64String(iv);
+                aesAlg.Padding = PaddingMode.PKCS7;
+
+                var encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
+
+                // Create the streams used for encryption. 
+                using (var msEncrypt = new MemoryStream())
+                {
+                    using (var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
+                    using (var swEncrypt = new StreamWriter(csEncrypt))
+                    {
+                        swEncrypt.Write(text);
+                    }
+                    return Convert.ToBase64String(msEncrypt.ToArray());
+                }
+            }
+        }
         public async Task Run()
         {
             string? outputPathFinal = null;
@@ -266,8 +311,11 @@ namespace svisha
                 playlist.AppendLine("#EXT-X-ENDLIST");
                 File.WriteAllText(Path.Combine(outputPathFinal, "playlist.m3u8"), playlist.ToString());
 
-                File.WriteAllText(Path.Combine(outputPathFinal, "index.html"), Resources.R["template_hls.html"]);
+                var indexText = Resources.R["template_hls.html"];
+                var md = JsonConvert.SerializeObject(metadata, Formatting.Indented);
+                File.WriteAllText(Path.Combine(outputPathFinal, "index.html"), indexText.Replace("const metadata = null;", $"const metadata = {md};"));
                 File.WriteAllText(Path.Combine(outputPathFinal, "hls.light.min.js"), Resources.R["hls.light.min.js"]);
+                File.WriteAllText(Path.Combine(outputPathFinal, "aes-decryptor.js"), Resources.R["aes-decryptor.js"]);
             }
             catch
             {

@@ -5,6 +5,7 @@ using System.Linq;
 using CommandLine;
 using Models.FFProbe;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace svisha
 {
@@ -111,7 +112,9 @@ namespace svisha
 
             var videoStream = FindVideoStrean(probeResult);
 
-            var enc = new Encode(videoId, o.InputPath, videoStream.Width, videoStream.Height, o.OutputPath, o.Codec);
+            string title = probeResult.Format?.Tags?.Title ?? Path.GetFileNameWithoutExtension(o.InputPath);
+            DateTimeOffset timestamp = probeResult.Format?.Tags?.CreationTime ?? DateTimeOffset.Now;
+            var enc = new Encode(videoId, o.InputPath, videoStream.Width, videoStream.Height, title, JsonConvert.ToString(timestamp), null, o.OutputPath, o.Codec);
             await enc.Run();
 
             db = Models.Database.Database.Load(dbPath);
@@ -120,10 +123,10 @@ namespace svisha
             {
                 Id = enc.VideoId,
                 Codec = enc.Codec.ToString(),
-                Date = DateTimeOffset.Now,
+                Date = timestamp,
                 Key = ByteArrayToString(enc.Key),
                 Thumbnail = "",
-                Title = probeResult.Format?.Tags?.Title ?? Path.GetFileNameWithoutExtension(o.InputPath),
+                Title = title,
                 SourcePath = Path.GetFullPath(o.InputPath)
             });
             db.Save(dbPath);

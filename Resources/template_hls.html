@@ -18,10 +18,13 @@
 
   <body>
       <script src="hls.light.min.js"></script>
+      <script src="aes-decryptor.js"></script>
 
       <video id="video" controls></video>
 
       <script>
+        const metadata = null;
+
         function fromHexString(hexString) {
           var bytes = new Uint8Array(Math.ceil(hexString.length / 2));
           for (var i = 0; i < bytes.length; i++) {
@@ -30,31 +33,87 @@
           return bytes;
         }
 
-        function getKey() {
-          return fromHexString(location.hash.substring(1));
+        const key = fromHexString(location.hash.substring(1));
+
+        function base64ToUint8Array(text) {
+          var raw = window.atob(text);
+          var a = new Uint8Array(raw.length);
+          for (var i = 0; i < raw.length; i++) {
+            a[i] = raw.charCodeAt(i);
+          }
+          return a;
         }
 
-        var key = getKey();
+        function utf8ArrayToStr(array) {
+          var result = [];
+          var charFromCodePt = String.fromCodePoint || String.fromCharCode;
+          var codePt, byte1;
+          var buffLen = array.length;
+
+          result.length = 0;
+
+          for (var i = 0; i < buffLen;) {
+              byte1 = array[i++];
+
+              if (byte1 <= 0x7F) {
+                  codePt = byte1;
+              } else if (byte1 <= 0xDF) {
+                  codePt = ((byte1 & 0x1F) << 6) | (array[i++] & 0x3F);
+              } else if (byte1 <= 0xEF) {
+                  codePt = ((byte1 & 0x0F) << 12) | ((array[i++] & 0x3F) << 6) | (array[i++] & 0x3F);
+              } else if (String.fromCodePoint) {
+                  codePt = ((byte1 & 0x07) << 18) | ((array[i++] & 0x3F) << 12) | ((array[i++] & 0x3F) << 6) | (array[i++] & 0x3F);
+              } else {
+                  codePt = 63;    // Cannot convert four byte code points, so use "?" instead
+                  i += 3;
+              }
+
+              result.push(charFromCodePt(codePt));
+          }
+
+          return result.join('');
+        }
+
+        function decryptMetadata(data_b64) {
+          if (!key || !metadata || !metadata.iv || !data_b64) {
+            return null;
+          }
+          var decryptor = new AESDecryptor();
+          decryptor.expandKey(key.buffer);
+
+          var iv = base64ToUint8Array(metadata.iv);
+          var raw = base64ToUint8Array(data_b64);
+          var text = decryptor.decrypt(raw.buffer, 0, iv.buffer, true);
+          return utf8ArrayToStr(new Uint8Array(text));
+        }
+
         if (!key || key.byteLength != 16) {
           alert("This video is encrypted, you need to supply correct key to start playback");
-        } else if(!Hls.isSupported()) {
-          alert("This browser does not support playback of this media. Please open this link in Firefox or Chrome");
         } else {
-          var video = document.getElementById('video');
-          var hls = new Hls();
-          if (location.hash !== "") {
-            hls.coreComponents.forEach(function(c) {
-              if (c.handledEvents.indexOf("hlsKeyLoading") >= 0) {
-                c.decryptkey = key;
-                c.decrypturl = "http://127.0.0.1/playlist.key";
-              }
-            });
+          if (metadata && metadata.title) {
+            var title = decryptMetadata(metadata.title);
+            document.title = title;
           }
-          hls.loadSource('playlist.m3u8');
-          hls.attachMedia(video);
-          hls.on(Hls.Events.MANIFEST_PARSED,function() {
-            video.play();
-        });
+
+          if(!Hls.isSupported()) {
+            alert("This browser does not support playback of this media. Please open this link in Firefox or Chrome");
+          } else {
+            var video = document.getElementById('video');
+            var hls = new Hls();
+            if (location.hash !== "") {
+              hls.coreComponents.forEach(function(c) {
+                if (c.handledEvents.indexOf("hlsKeyLoading") >= 0) {
+                  c.decryptkey = key;
+                  c.decrypturl = "http://127.0.0.1/playlist.key";
+                }
+              });
+            }
+            hls.loadSource('playlist.m3u8');
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED,function() {
+              video.play();
+          });
+        }
        }
       </script>
 
