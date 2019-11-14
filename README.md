@@ -64,8 +64,7 @@ external web server. In order to playback the key after a hash character must be
 # Example
 
 Sample video hosted on Backblaze bucket could be viewed at: 
-https://f000.backblazeb2.com/file/mystaticweb/8beb6bb0a812404fa7359e0a94ee2653/index.html#b65d07f1e3739d32548b1e5c6cc716de
-
+https://f000.backblazeb2.com/file/mystaticweb/c058df5b63114051b47e372d4f143c66/index.html#2cd54bb25561d2b9816cad35c6fbe6ee
 
 # Third Party Code Used
 
