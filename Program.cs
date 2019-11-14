@@ -59,7 +59,7 @@ namespace svisha
             [Option('o', "overwrite", Required = false, HelpText = "When source video already encoded, overwrite")]
             public bool Overwtite { get; set; }
 
-            [Option('p', "output_path", Required = false, HelpText = "Specify which path should be used to store videos. Default: ~/Videos/svisha")]
+            [Option('s', "storage", Required = false, HelpText = "Specify which path should be used to store videos. Default: ~/Videos/svisha")]
             public string OutputPath { get; set; }
 
             [Value(0, Required = true, HelpText = "Path to the source video")]
@@ -72,7 +72,7 @@ namespace svisha
             [Option('v', "verbose", Required = false, HelpText = "Set output to verbose messages.")]
             public bool Verbose { get; set; }
 
-            [Option('p', "output_path", Required = false, HelpText = "Specify which path should be used to store videos. Default: ~/Videos/svisha")]
+            [Option('s', "storage", Required = false, HelpText = "Specify which path should be used to store videos. Default: ~/Videos/svisha")]
             public string OutputPath { get; set; }
         }
 
@@ -82,7 +82,7 @@ namespace svisha
             [Option('v', "verbose", Required = false, HelpText = "Set output to verbose messages.")]
             public bool Verbose { get; set; }
 
-            [Option('p', "output_path", Required = false, HelpText = "Specify which path should be used to store videos. Default: ~/Videos/svisha")]
+            [Option('s', "storage", Required = false, HelpText = "Specify which path should be used to store videos. Default: ~/Videos/svisha")]
             public string OutputPath { get; set; }
 
             [Value(0, Required = true, HelpText = "Video ID or path to the source video")]

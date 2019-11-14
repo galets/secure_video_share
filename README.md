@@ -30,7 +30,6 @@ Currently tested on ubuntu 19.10 linux.
 
 Required:
 * .NET core 3.0
-* ffmpeg 4.1 or higher
 
 To build and install:
 
@@ -39,6 +38,9 @@ $ dotnet build svisha.csproj --configuration Release
 $ cp -va bin/Release/netcoreapp3.0 ~/.local/share/secure_video_share
 $ alias svisha=~/.local/share/secure_video_share/svisha
 ```
+
+Alternatively, use release zip file. These archives could be extracted to a directory of your
+choice and executable ran directly from it.
 
 # Use
 
