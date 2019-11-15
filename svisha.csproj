@@ -5,7 +5,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
-    <Version>0.1.40.9510</Version>
+    <Version>0.1.42.1871</Version>
   </PropertyGroup>
   
   <ItemGroup>
