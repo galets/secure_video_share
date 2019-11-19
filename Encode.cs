@@ -274,14 +274,16 @@ namespace svisha
                         ffargs.Add("3.0");
                     }
 
-                    // ffargs.Add("-acodec");
-                    // ffargs.Add("aac");
-                    // ffargs.Add("-b:a");
-                    // ffargs.Add($"{sr.AudioBitRate}k");
                     ffargs.Add("-acodec");
-                    ffargs.Add("libmp3lame");
+                    ffargs.Add("aac");
+                    ffargs.Add("-ac");
+                    ffargs.Add("2");
                     ffargs.Add("-b:a");
-                    ffargs.Add($"{sr.AudioBitRate + 16}k");
+                    ffargs.Add($"{sr.AudioBitRate}k");
+                    // ffargs.Add("-acodec");
+                    // ffargs.Add("libmp3lame");
+                    // ffargs.Add("-b:a");
+                    // ffargs.Add($"{sr.AudioBitRate + 16}k");
 
                     ffargs.Add("-g");
                     ffargs.Add("60");
@@ -301,7 +303,7 @@ namespace svisha
                     var streamFile = $"video_{sr.Name}.m3u8";
                     ffargs.Add(Path.Combine(outputPathFinal, streamFile));
 
-                    playlist.AppendFormat("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH={0},RESOLUTION={1}x{2}\n", (sr.BitRate + sr.AudioBitRate + 16) * 1024, sr.Width, sr.Height);
+                    playlist.AppendFormat("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH={0},RESOLUTION={1}x{2}\n", (sr.BitRate + sr.AudioBitRate) * 1024, sr.Width, sr.Height);
                     playlist.AppendLine(streamFile);
 
                 }
