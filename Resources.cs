@@ -290,6 +290,16 @@ class AESDecryptor {
   <head>
     <title>Video playback</title>
     <style>
+      #title
+      {
+        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        font-size: 5vh;
+      }   
+      #timestamp
+      {
+        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        font-size: 2vh;
+      }   
       video
       {
           width: 100vw; 
@@ -305,6 +315,9 @@ class AESDecryptor {
   <body>
       <script src=""hls.light.min.js""></script>
       <script src=""aes-decryptor.js""></script>
+
+      <h1 id=""title""></h1>
+      <p id=""timestamp""></p>
 
       <video id=""video"" controls></video>
 
@@ -377,8 +390,20 @@ class AESDecryptor {
           alert(""This video is encrypted, you need to supply correct key to start playback"");
         } else {
           if (metadata && metadata.title) {
-            var title = decryptMetadata(metadata.title);
-            document.title = title;
+            try {
+              var title = decryptMetadata(metadata.title);
+              document.title = title;
+              document.getElementById(""title"").innerText = title;
+            } catch {
+            }
+          }
+          if (metadata && metadata.timestamp) {
+            try {
+              var timestamp = decryptMetadata(metadata.timestamp);
+              var timestampDate = new Date(Number(timestamp));
+              document.getElementById(""timestamp"").innerText = timestampDate.toDateString();
+            } catch {
+            }
           }
 
           if(!Hls.isSupported()) {

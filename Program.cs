@@ -113,8 +113,10 @@ namespace svisha
             var videoStream = FindVideoStrean(probeResult);
 
             string title = probeResult.Format?.Tags?.Title ?? Path.GetFileNameWithoutExtension(o.InputPath);
-            DateTimeOffset timestamp = probeResult.Format?.Tags?.CreationTime ?? DateTimeOffset.Now;
-            var enc = new Encode(videoId, o.InputPath, videoStream.Width, videoStream.Height, title, JsonConvert.ToString(timestamp), null, o.OutputPath, o.Codec);
+            DateTimeOffset timestamp = (probeResult.Format?.Tags?.CreationTime is null || probeResult.Format.Tags.CreationTime.Ticks == 0) ? DateTimeOffset.Now : probeResult.Format.Tags.CreationTime;
+            DateTimeOffset JSEPOCH = new DateTimeOffset(1970, 1, 1, 0, 0, 0, 0, TimeSpan.Zero);
+            var timestampJs = (timestamp - JSEPOCH).TotalMilliseconds.ToString("F0");
+            var enc = new Encode(videoId, o.InputPath, videoStream.Width, videoStream.Height, title, timestampJs, null, o.OutputPath, o.Codec);
             await enc.Run();
 
             db = Models.Database.Database.Load(dbPath);
